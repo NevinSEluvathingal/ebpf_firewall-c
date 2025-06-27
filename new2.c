@@ -9,6 +9,13 @@ struct user_downstream_event {
     __u8 mac[6];
 };
 
+struct bpf_map_def SEC("maps/mac_blocklist") = {
+    .type = BPF_MAP_TYPE_HASH,
+    .key_size = 6,
+    .value_size = sizeof(__u8),
+    .max_entries = 128,
+};
+
 struct {
     __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
     __uint(max_entries, 64);
@@ -29,6 +36,11 @@ int count_downstream(struct xdp_md *ctx) {
     struct iphdr *ip = data + sizeof(struct ethhdr);
     if ((void *)(ip + 1) > data_end)
         return XDP_PASS;
+
+    __u8 *blocked = bpf_map_lookup_elem(&mac_blocklist, eth->h_source);
+    if (blocked) {
+        return XDP_DROP;
+    }
 
     // Only downstream: destination IP is local? (You can filter here)
     // For example, ignore packets that are not destined to this host.
