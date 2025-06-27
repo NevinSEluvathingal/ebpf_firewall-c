@@ -9,12 +9,12 @@ struct user_downstream_event {
     __u8 mac[6];
 };
 
-struct bpf_map_def SEC("maps/mac_blocklist") = {
-    .type = BPF_MAP_TYPE_HASH,
-    .key_size = 6,
-    .value_size = sizeof(__u8),
-    .max_entries = 128,
-};
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(key_size, 6);
+    __uint(value_size, sizeof(__u8));
+    __uint(max_entries, 128);
+} mac_blocklist SEC(".maps");
 
 struct {
     __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
