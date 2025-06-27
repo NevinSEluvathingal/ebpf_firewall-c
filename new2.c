@@ -37,7 +37,7 @@ int count_downstream(struct xdp_md *ctx) {
     if ((void *)(ip + 1) > data_end)
         return XDP_PASS;
 
-    __u8 *blocked = bpf_map_lookup_elem(&mac_blocklist, eth->h_source);
+    __u8 *blocked = bpf_map_lookup_elem(&mac_blocklist, &eth->h_source);
     if (blocked) {
         return XDP_DROP;
     }
